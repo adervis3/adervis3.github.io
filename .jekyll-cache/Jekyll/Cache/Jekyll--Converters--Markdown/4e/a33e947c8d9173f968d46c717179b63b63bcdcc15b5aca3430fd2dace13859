@@ -1,0 +1,166 @@
+I"F#<h2 id="özet">Özet</h2>
+
+<p>Kötü niyetli kişi makineye düşük ayrıcalıklarla erişim sağladığında ayrıcalıklarını artırmak için sistem içerisinde düz yazı olarak kayıt edilmiş kullanıcı bilgileri arar. Ayrıcalıkları artırmanın en kolay ve fark edilmesi zor olan bir yoldur.  Bu dosyaların bulunabileceği belli başlı birkaç yer vardır.</p>
+
+<h2 id="windows">Windows</h2>
+
+<h3 id="unattend-files">Unattend files</h3>
+
+<p>Sistem yöneticileri defalarca kez Windows kurup ayarlarını yapmak yerine bu işi otomatikleştirmeyi tercih ederler. Windows bunun için unattend (katılımsız kurulum) kurulumu özelliğini sağlar. Sistem yöneticisi kurulumda yapmak istediği tüm ayarları bir xml dosyası olarak hazırlar. Bu dosyaya cevap dosyası (answer files) adı verilir. Bu dosyanın içerisine yerel yönetici (local admin) kullanıcısının parolası düz metin olarak ya da base64 ile encode edilerek yazılır. Bu dosyaları;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:\Windows\sysprep\sysprep.xml
+C:\Windows\sysprep\sysprep.inf
+C:\Windows\sysprep.inf
+C:\Windows\Panther\Unattended.xml
+C:\Windows\Panther\Unattend.xml
+C:\Windows\Panther\Unattend\Unattend.xml
+C:\Windows\Panther\Unattend\Unattended.xml
+C:\Windows\System32\Sysprep\unattend.xml
+C:\Windows\System32\Sysprep\unattended.xml
+C:\unattend.txt
+C:\unattend.inf
+</code></pre></div></div>
+<p>bulabilirsiniz.</p>
+
+<p>Bir unattend dosyası okunduğunda içerisinde <Password> etiketi olup olmadığı araştırılmalı.</Password></p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;UserAccounts&gt;</span>
+	<span class="nt">&lt;LocalAccounts&gt;</span>
+        	<span class="nt">&lt;LocalAccount&gt;</span>
+            		<span class="nt">&lt;Password&gt;</span>
+               			 <span class="nt">&lt;Value&gt;</span>UEBzc3dvcmQxMjMhUGFzc3dvcmQ= <span class="nt">&lt;/Value&gt;</span>
+                		<span class="nt">&lt;PlainText&gt;</span>false<span class="nt">&lt;/PlainText&gt;</span>
+            		<span class="nt">&lt;/Password&gt;</span>
+            		<span class="nt">&lt;Description&gt;</span>Local Administrator<span class="nt">&lt;/Description&gt;</span>
+            		<span class="nt">&lt;DisplayName&gt;</span>Administrator<span class="nt">&lt;/DisplayName&gt;</span>
+            		<span class="nt">&lt;Group&gt;</span>Administrators<span class="nt">&lt;/Group&gt;</span>
+            		<span class="nt">&lt;Name&gt;</span>Administrator<span class="nt">&lt;/Name&gt;</span>
+        	<span class="nt">&lt;/LocalAccount&gt;</span>
+ 	<span class="nt">&lt;/LocalAccounts&gt;</span>
+<span class="nt">&lt;/UserAccounts&gt;</span>
+</code></pre></div></div>
+
+<p>İlgili etiket kontrol edildiğinde Administrator parolasının “UEBzc3dvcmQxMjMhUGFzc3dvcmQ=” olduğu görünüyor. &lt;PlainText&gt; etiketi kontrol edilirse parolanın düz metin olarak saklanmadığı gösterilmiş. Değeri base64 ile decode ederek “P@ssword123!Password” elde ederiz. Windows burada parolanın sonuna “Password” ekliyor. Bunu silerek gerçek parola elde edilebilir.</p>
+
+<h4 id="group-policy-preferences">Group Policy Preferences</h4>
+
+<p>Sistem yöneticileri bazen benzer çözümler için yerel yöneticilerin (local admin) parolalarını Group Policy içine kayıt ederek Policy’i yayınlar. Parolayı içeren Groups.xml dosyası yerel olarak önbelleğe alınır veya her etki alanı kullanıcısının bu dosyaya okuma erişimi olduğu için etki alanı denetleyicisinden alınabilir. Buradaki parola şifrelenmiş şekilde bulunur ancak Microsoft şifrelemede kullanılan anahtarı yanlışlıkla(?) herkese açık şekilde yayınlamıştır. Elde edilen şifrelenmiş parola “gpp-decrypt” ile çözülebilir. Bulunabileceği yerler;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:\ProgramData\Microsoft\Group Policy\History\????\Machine\Preferences\Groups\Groups.xml
+\\????\SYSVOL\\Policies\????\MACHINE\Preferences\Groups\Groups.xml
+</code></pre></div></div>
+
+<p>İçerisinde aynı şekilde şifrelenmiş parola bulabileceğiniz diğer dosyalar;</p>
+
+<ul>
+  <li>Groups.xml</li>
+  <li>Services.xml</li>
+  <li>Scheduledtasks.xml</li>
+  <li>DataSources.xml</li>
+  <li>Printers.xml</li>
+  <li>Drives.xml</li>
+</ul>
+
+<h4 id="webconfig">Web.config</h4>
+
+<p>Bir başka yol olarak web.config dosyaları aranabilir. Bu dosyaların içleri kontrol edildiğinde parola bulma ihtimaliniz vardır.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config\web.config
+C:\inetpub\wwwroot\web.config
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;authentication</span> <span class="na">mode=</span><span class="s">"Forms"</span><span class="nt">&gt;</span> 
+  <span class="nt">&lt;forms</span> <span class="na">name=</span><span class="s">"login"</span> <span class="na">loginUrl=</span><span class="s">"/admin"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;credentials</span> <span class="na">passwordFormat =</span> <span class="s">"Clear"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;user</span> <span class="na">name=</span><span class="s">"Administrator"</span> <span class="na">password=</span><span class="s">"P@ssword123!"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;/credentials&gt;</span>
+  <span class="nt">&lt;/forms&gt;</span>
+<span class="nt">&lt;/authentication&gt;</span>
+</code></pre></div></div>
+
+<h4 id="credential-manager">Credential Manager</h4>
+
+<p>Windows, izin verdiğiniz bilgileri Kimlik Bilgileri Yöneticisinde tutar.</p>
+
+<p align="center">
+	<img src="/images/stored_credentials_ss/1.png" alt="" />
+</p>
+
+<h4 id="windows-autologin">Windows Autologin</h4>
+
+<p>Windows otomatik login özelliği aktifleştirilmiş ise kayıt defterinde parola bulabilirsiniz.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon"
+</code></pre></div></div>
+
+<h3 id="üçüncü-parti-uygulamalar">Üçüncü Parti Uygulamalar</h3>
+
+<h4 id="mcafee">McAfee</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>%AllUsersProfile%Application Data\McAfee\Common Framework\SiteList.xml
+</code></pre></div></div>
+
+<h4 id="vnc">VNC</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ultravnc]
+passwd=5FAEBBD0EF0A2413
+</code></pre></div></div>
+
+<h4 id="realvnc">RealVNC</h4>
+
+<p>Parolasını kayıt defterinde tutar.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg query HKEY_LOCAL_MACHINE\SOFTWARE\RealVNC\WinVNC4 /v password
+</code></pre></div></div>
+
+<h4 id="putty">Putty</h4>
+
+<p>Parolasını kayıt defterinde tutar.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg query "HKCU\Software\SimonTatham\PuTTY\Sessions"
+</code></pre></div></div>
+
+<h2 id="bulma-yöntemleri">Bulma Yöntemleri</h2>
+
+<h3 id="yol--1">Yol -1:</h3>
+
+<p>Manuel olarak komut satırına aşağıda ki komutları ve benzerlerini girerek bulabilirsiniz.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dir c:\*vnc.ini /s /b /c
+dir c:\*ultravnc.ini /s /b /c
+dir c:\ /s /b /c | findstr /si \*vnc.ini
+dir /b /s *pass*
+dir /b /s unattend.xml
+dir /b /s web.config
+dir /b /s sysprep.inf
+dir /b /s sysprep.xml
+findstr /si password \*.txt | \*.xml | \*.ini
+findstr /si pass \*.txt | \*.xml | \*.ini
+</code></pre></div></div>
+
+<h3 id="yol--2">Yol -2:</h3>
+
+<p><a href="https://github.com/hlldz/dazzleUP">DazzleUP</a> kullanarak bu dosyaları otomatik olarak tespit edebilirsiniz.</p>
+
+<p align="center">
+	<img src="/images/stored_credentials_ss/2.png" alt="" />
+</p>
+
+<h3 id="yol--3">Yol -3:</h3>
+
+<p><a href="https://github.com/AlessandroZ/LaZagne">LaZagne</a> kullanarak kayıtlı parolaları bulabilirsiniz.</p>
+
+<p align="center">
+	<img src="/images/stored_credentials_ss/3.png" alt="" />
+</p>
+
+<h2 id="kaynakça">Kaynakça:</h2>
+
+<ul>
+  <li>https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/update-windows-settings-and-scripts-create-your-own-answer-file-sxs#:~:text=Answer%20files%20(or%20Unattend%20files,and%20picks%20their%20default%20language.</li>
+  <li>https://pentestlab.blog/2017/04/19/stored-credentials/</li>
+  <li>https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-setup-automation-overview#implicit-answer-file-search-order</li>
+  <li>https://github.com/AlessandroZ/LaZagne</li>
+  <li>https://github.com/hlldz/dazzleUP</li>
+</ul>
+:ET

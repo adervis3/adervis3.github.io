@@ -1,0 +1,170 @@
+I"�#<h2 id="özet">Özet</h2>
+
+<p>AlwaysInstallElevated, Windows işletim sistemlerinde yüksek ayrıcalıklarla MSI paketlerini çalıştırmaya izin veren bir özelliktir. Kötü niyetli kişiler tarafından istismar edilerek NT AUTHORITY\SYSTEM ayrıcalıkları elde edilebilir.</p>
+
+<h2 id="detaylar">Detaylar</h2>
+
+<p>Windows işletim sistemi uygulamaları yüklemek için MSI (Microsoft Windows Installer) paketlerini kullanır. AlwaysInstallElevated özelliği aktif ise Windows, MSI paketlerini normal kullanıcılar için sistem ayrıcalıklarında yüklemesine izin verir. Burada ki amaç kullanıcıların sistem ayrıcalıkları gerektiren bir uygulama yüklemek istediğinde sistem yöneticisinin kullanıcıya geçici yerel yönetici erişimi vermeden kurulum yapabilmesini sağlamaktır. Ancak kötü niyetli kişiler tarafından bu durum istismar edilerek NT AUTHORITY\SYSTEM ayrıcalıklarına yükselmek için kullanılabilir. İstismar edildiğinde sistemde çok fazla ayrıcalık elde edilebileceği için bu özelliğin kullanılmaması tavsiye edilmektedir. Kısacası AlwaysInstallElevated bir zafiyet değildir, özelliğin kötüye kullanımı sayesinde hak yükseltilebilmesini sağlar.</p>
+
+<p><strong>NOT:</strong> MSI paketlerinin çalışması için yüksek ayrıcalıklara ihtiyaçları yoktur.</p>
+
+<blockquote>
+  <p>This policy setting directs Windows Installer to use elevated permissions when it installs any program on the system.
+If you enable this policy setting, privileges are extended to all programs. These privileges are usually reserved for programs that have been assigned to the user (offered on the desktop), assigned to the computer (installed automatically), or made available in Add or Remove Programs in Control Panel. This profile setting lets users install programs that require access to directories that the user might not have permission to view or change, including directories on highly restricted computers
+If you disable or do not configure this policy setting, the system applies the current user’s permissions when it installs programs that a system administrator does not distribute or offer.
+Note: This policy setting appears both in the Computer Configuration and User Configuration folders. To make this policy setting effective, you must enable it in both folders.
+Caution: Skilled users can take advantage of the permissions this policy setting grants to change their privileges and gain permanent access to restricted files and folders. Note that the User Configuration version of this policy setting is not guaranteed to be secure.</p>
+</blockquote>
+
+<p><strong>Kaynak:</strong> Group Policy “Always install with elevated privileges” Settings</p>
+
+<p>Zafiyetin kaynağı aşağıda verilmiş olan anahtar kısmına DWORD tipinde “AlwaysInstallElevated“ değeri 1 olarak ayarlanmış olmasıdır.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Installer
+HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Installer
+</code></pre></div></div>
+
+<p>2 farklı yol ile aşağıda gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/1.png" alt="" />
+</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/2.png" alt="" />
+</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/3.png" alt="" />
+</p>
+
+<h2 id="i̇stismar-edilmesi">İstismar Edilmesi</h2>
+
+<h3 id="yol--1">Yol -1:</h3>
+
+<p>Senaryo olarak hedef sistemde test adlı düşük ayrıcalıklardaki kullanıcının Program.msi dosyasını indirip kurması beklenmektedir.</p>
+
+<p>İlk adımda msfvenom ile reverse_tcp üzerinden meterpreter oturumu oluşturacak zararlı yazılımımızı hazırlıyoruz. Daha sonra zararlı yazılımı NT AUTHORITY\SYSTEM ayrıcalıklarında çalıştıracak yükseliyici scriptimizi (msi) hazırlıyoruz. Scripte zararlının hangi dizinde olacağını bildiriyoruz.
+Zararlı yazılımın ve yükleyici scriptin oluşturulmasına ait ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/4.png" alt="" />
+</p>
+
+<p>Yükleyici scriptin çalıştırılıp zararlı yazılımı tetiklemesine dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/5.png" alt="" />
+</p>
+
+<p>Yükleyici script çalıştıktan sonra zararlı yazılım tetiklendi ve meterpreter oturumu elde edildi. Elde edilen meterpreter oturumu aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/6.png" alt="" />
+</p>
+
+<h3 id="yol--2">Yol -2:</h3>
+
+<p>Bir farklı senaryo olarak direkt olarak meterpreter oturumu elde edilerek sisteme erişilmesi gösterilmiştir.</p>
+
+<p>İlk adımda msfvenom ile reverse_tcp üzerinden meterpreter oturumu oluşturacak yükleyici scripti hazırlıyoruz. Script NT AUTHORITY\SYSTEM ayrıcalıklarında çalışacağı için meterpreter oturumuda NT AUTHORITY\SYSTEM ayrıcalıklarında olacaktır. İkinci bir zararlı yazılıma ihtiyaç duyulmayacaktır.</p>
+
+<p><strong>NOT:</strong> Bu durum incelendiğinde msfvenom ile script üretilirken payload olarak windows/exec seçilerek komutta çalıştırabilirsiniz. Ancak bu durum hak yükseltme olmadığı için bu yazının konusu değildir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/7.png" alt="" />
+</p>
+
+<p>Zararlı scriptin çalıştırılarak meterpreter oturumunu açtığına dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/8.png" alt="" />
+</p>
+
+<p>NT AUTHORITY\SYSTEM ayrıcalıklarında elde edilen meterpreter oturumu aşağıda gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/9.png" alt="" />
+</p>
+
+<h3 id="yol--3">Yol -3:</h3>
+
+<p>Son senaryo olarak sisteme düşük ayrıcalıklarda bulaşmış bir zararlı yazılım olsun. Zararlı yazılımdan meterpreter oturumu elde edilmiş olsun. Eğer ki ilgili zafiyet varsa sisteme yine bir yükleyici script oluşturarak NT AUTHORITY\SYSTEM ayrıcalıklarına erişilebilir.</p>
+
+<p>Sistemde düşük ayrıcalıklara sahip kullanıcı üzerinden oluşturulmuş meterpreter oturumu aşağıda gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/12.png" alt="" />
+</p>
+
+<p>Oturum arka plana atılarak metasploitte ki always_install_elevated modülü çalıştırılarak yüksek ayrıcalıklara geçilecek. Gerekli ayarların yapılıp modülün çalıştırılması ve NT AUTHORITY\SYSTEM ayrıcalıklarına geçiş aşağıda gösterilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/13.png" alt="" />
+</p>
+
+<h2 id="bulma-yöntemleri">Bulma Yöntemleri</h2>
+
+<h3 id="yol--1-1">Yol -1:</h3>
+
+<p>Manuel olarak komut satırında</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg query HKLM\Software\Policies\Miscrosoft\Windows\Installer
+reg query HKCU\Software\Policies\Miscrosoft\Windows\Installer
+</code></pre></div></div>
+
+<p>komutları girildikten sonra AlwaysInstallElevated 0x1 olarak belirlenmiş olmalıdır.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/10.png" alt="" />
+</p>
+
+<h3 id="yol--2-1">Yol -2:</h3>
+
+<p><a href="https://github.com/hlldz/dazzleUP">DazzleUP</a> kullanarak yüksek ayrıcalıklarda yükleme yapılandırma zafiyetini tespit edebilirsiniz.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/11.png" alt="" />
+</p>
+
+<h2 id="çözüm">Çözüm</h2>
+
+<p>Kayıt defteri açılarak (regedit) aşağıda verilmiş anahtarlar içerisinden AlwaysInstallElevated değeri 0 olarak düzenlenmelidir.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HKLM\Software\Policies\Miscrosoft\Windows\Installer
+HKCU\Software\Policies\Miscrosoft\Windows\Installer
+</code></pre></div></div>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/14.png" alt="" />
+</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/15.png" alt="" />
+</p>
+
+<p>Eğer özellik group policy ile aktif edilmiş ise policynin disable olması gereklidir. İlgili ayar için gpedit -&gt; Computer Configuration -&gt; Administrative Templates -&gt; All Settings -&gt; Always install with elevated privileges</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/16.png" alt="" />
+</p>
+
+<p>Gerekli düzenlemelerden sonra zafiyet tekrar araştırılarak ilgili zafiyetin olmadığına dair ekran görüntüsü aşağıda verilmiştir.</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/17.png" alt="" />
+</p>
+
+<p align="center">
+	<img src="/images/alwaysinstallelevated_ss/18.png" alt="" />
+</p>
+
+<h2 id="kaynakça">Kaynakça</h2>
+
+<ul>
+  <li>https://docs.microsoft.com/en-us/windows/win32/msi/alwaysinstallelevated</li>
+  <li>https://github.com/hlldz/dazzleUP</li>
+  <li>https://dmcxblue.gitbook.io/red-team-notes/privesc/unquoted-service-path</li>
+</ul>
+
+:ET
