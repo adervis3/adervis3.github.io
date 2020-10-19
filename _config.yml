@@ -3,7 +3,7 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-
+remote_theme: "jeffreytse/jekyll-theme-yat"
 title: Your awesome title
 email: your-email@domain.com
 author: GitHub User
@@ -120,7 +120,7 @@ yat:
 markdown: kramdown
 kmarkdown:
   input: GFM
-remote_theme: "jeffreytse/jekyll-theme-yat"
+
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
