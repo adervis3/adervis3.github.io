@@ -4,12 +4,14 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Ahmet Derviş
-email: 
-author: adervis3
-copyright: Copyright © 2020
+title: Your awesome title
+email: your-email@domain.com
+author: GitHub User
+copyright: Copyright © 1970-2010
 description: >- # this means to ignore newlines until "baseurl:"
-  Ahmet Derviş'in Kişisel Blogudur.
+  Write an awesome description for your new site here. You can edit this
+  line in _config.yml. It will appear in your document head meta (for
+  Google search results) and in your feed.xml site description.
 
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
@@ -18,7 +20,7 @@ favicon: "" # the favicon for your site
 # Yat date format
 # refer to https://shopify.github.io/liquid/filters/date/ if you want to customize this
 yat:
-  date_format: "%d %b, %Y"
+  date_format: "%b %d, %Y"
 
 # If you want more debug log, you can set true
 # debug: false
@@ -27,13 +29,13 @@ yat:
 # header_transparent: true
 
 # Google analytics
-google_analytics: 24165720
+# google_analytics: [Tracking ID]
 
 # If you want to generate website sitemap, you can set true
 # sitemap: false
 
 # If you want to change site language, you can set lang option
-# lang: "tr"  # default lang is en
+# lang: "en"  # default lang is en
 
 # Translate languges
 # langs refer to https://cloud.google.com/translate/docs/languages
@@ -80,7 +82,7 @@ google_analytics: 24165720
 # Default mode is "auto", "auto" is for auto nightshift
 # (19:00 - 07:00), "manual" is for manual toggle, and
 # "on/off" is for always on/off.
-night_mode: "on"
+# night_mode: "auto"
 
 # If you want to link only specific pages in your header, uncomment
 # this and add the path to the pages in order as they should show up
@@ -99,11 +101,11 @@ night_mode: "on"
 #     banner: "Your image url"
 
 # Pagination setting
-paginate: 5
+# paginate: 5
 
 # Disqus comments
 # disqus:
-shortname: adervis3
+#   shortname: "Your Disqus username"
 
 # Gitment comments
 # gitment:
@@ -118,17 +120,10 @@ shortname: adervis3
 markdown: kramdown
 kmarkdown:
   input: GFM
-
+remote_theme: "jeffreytse/jekyll-theme-yat"
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
   - jekyll-paginate
   - jekyll-spaceship
-
-
-
-- name: Jekyll Deploy Action
-  uses: jeffreytse/jekyll-deploy-action@v0.1.3
-  
-remote_theme: "jeffreytse/jekyll-theme-yat"
